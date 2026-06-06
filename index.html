@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>TON Coin Master | Telegram Mini App</title>
-    <!-- Telegram Web App SDK -->
+    <title>TON Coin Master</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
             --primary-bg: #0d1117;
             --secondary-bg: #161b22;
             --text-color: #f0f6fc;
-            --coin-gold: #f5b041;
             --energy-color: #34d399;
             --accent-blue: #228be6;
+            --card-bg: #21262d;
         }
 
         body {
@@ -29,58 +28,64 @@
             overflow: hidden;
         }
 
-        /* Top Bar */
         .top-bar {
-            padding: 20px 16px;
+            padding: 15px 16px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .app-title { font-size: 14px; font-weight: bold; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; }
+        .app-title { font-size: 13px; font-weight: bold; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; }
         .score-container {
-            font-size: 40px;
+            font-size: 36px;
             font-weight: 800;
-            margin-top: 10px;
+            margin-top: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
-        .ton-icon { width: 36px; height: 36px; }
 
-        /* Main Game Area */
-        .game-area {
+        /* Screens Logic */
+        .screen {
+            display: none; 
             flex-grow: 1;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .screen.active {
+            display: flex; 
+        }
+
+        /* Tap Screen Area */
+        .game-area {
+            width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            flex-grow: 1;
             position: relative;
         }
-
         .coin-wrapper {
             position: relative;
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
-
         .coin {
-            width: 200px;
-            height: 200px;
+            width: 180px;
+            height: 180px;
             background: radial-gradient(circle, #5dade2, #2471a3 80%);
             border-radius: 50%;
             box-shadow: 0 10px 30px rgba(36, 113, 163, 0.4), inset 0 -5px 15px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 90px;
+            font-size: 80px;
             transition: transform 0.05s ease-out;
             user-select: none;
         }
-
-        /* Coin Tap Animation */
         .coin-wrapper:active .coin { transform: scale(0.95); }
-
-        /* Floating Score Text (+1) */
         .floating-score {
             position: absolute;
             color: #5dade2;
@@ -90,18 +95,13 @@
             pointer-events: none;
             animation: scoreUp 0.8s ease-out forwards;
         }
-
         @keyframes scoreUp {
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-120px); opacity: 0; }
         }
-
-        /* Energy Bar */
         .energy-section {
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            width: 100%;
+            padding-bottom: 10px;
         }
         .energy-bar-container {
             width: 100%;
@@ -120,67 +120,140 @@
             font-size: 14px;
             font-weight: bold;
             color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        /* Screens Styles */
+        .screen h2 { margin-top: 0; color: #5dade2; }
+        .screen p { text-align: center; color: rgba(255, 255, 255, 0.7); font-size: 14px; }
+        
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 15px;
+            width: 90%;
+            margin-bottom: 12px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            justify-content: center;
-            gap: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn:disabled { background-color: #486581; cursor: not-allowed; }
+
+        .leader-list { width: 100%; }
+        .leader-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         /* Bottom Nav */
         .bottom-nav {
             background-color: var(--secondary-bg);
-            padding: 12px 10px;
+            padding: 12px 5px;
             display: flex;
             justify-content: space-around;
             border-top: 1px solid rgba(255, 255, 255, 0.05);
         }
         .nav-item {
             text-align: center;
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            font-size: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 2px;
             flex: 1;
+            -webkit-tap-highlight-color: transparent;
         }
         .nav-item.active { color: var(--accent-blue); font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- Top Score Section -->
     <div class="top-bar">
         <div class="app-title" id="user-title">TON COIN MASTER</div>
         <div class="score-container">
-            <span id="score">0</span>
+            💎 <span id="score">0</span>
         </div>
     </div>
 
-    <!-- Main Click Area -->
-    <div class="game-area" id="game-area">
-        <div class="coin-wrapper" id="coin-btn">
-            <div class="coin">💎</div>
+    <div id="screen-tap" class="screen active">
+        <div class="game-area" id="game-area">
+            <div class="coin-wrapper" id="coin-btn">
+                <div class="coin">💎</div>
+            </div>
         </div>
-    </div>
-
-    <!-- Energy & Bottom Nav Area -->
-    <div>
         <div class="energy-section">
             <div class="energy-text">⚡ <span id="energy-current">1000</span> / 1000</div>
             <div class="energy-bar-container">
                 <div class="energy-bar-fill" id="energy-bar"></div>
             </div>
         </div>
+    </div>
 
-        <div class="bottom-nav">
-            <a href="#" class="nav-item active"><div>Tap</div></a>
-            <a href="#" class="nav-item"><div>Friends</div></a>
-            <a href="#" class="nav-item"><div>Tasks</div></a>
-            <a href="#" class="nav-item"><div>Leaderboard</div></a>
-            <a href="#" class="nav-item"><div>Airdrop</div></a>
+    <div id="screen-friends" class="screen">
+        <h2>Invite Friends</h2>
+        <p>ඔයාගේ යාලුවන්ට Invite කරලා Coins දිනාගන්න.</p>
+        <div class="card">
+            <div>
+                <div style="font-weight: bold;">Invite Link</div>
+                <div style="font-size: 11px; color: gray;">t.me/your_bot_username?start=ref</div>
+            </div>
+            <button class="btn" onclick="copyInvite()">Copy</button>
         </div>
+    </div>
+
+    <div id="screen-tasks" class="screen">
+        <h2>Tasks</h2>
+        <p>සරල වැඩ කරලා වැඩිපුර Coins එකතු කරගන්න.</p>
+        <div class="card">
+            <div>
+                <div style="font-weight: bold;">Join Our Channel</div>
+                <div style="color: #34d399; font-size: 13px;">+1,000 Coins</div>
+            </div>
+            <button id="task-btn" class="btn" onclick="doTask()">Join</button>
+        </div>
+    </div>
+
+    <div id="screen-leaderboard" class="screen">
+        <h2>Leaderboard</h2>
+        <p>වැඩිම Coins තියෙන සුපිරිම වැඩ්ඩෝ ටික.</p>
+        <div class="leader-list">
+            <div class="leader-item" style="color: gold;"><span>🥇 1. Kasun</span><span>542,300</span></div>
+            <div class="leader-item" style="color: silver;"><span>🥈 2. Nuwan</span><span>410,250</span></div>
+            <div class="leader-item" style="color: #cd7f32;"><span>🥉 3. Dilshan</span><span>389,000</span></div>
+            <div class="leader-item"><span>4. You</span><span id="leader-my-score">0</span></div>
+        </div>
+    </div>
+
+    <div id="screen-airdrop" class="screen">
+        <h2>Airdrop</h2>
+        <p>Listing & Distribution ළඟදීම බලාපොරොත්තු වන්න!</p>
+        <div class="card" style="justify-content: center; flex-direction: column; gap: 10px;">
+            <div style="font-size: 50px;">🎁</div>
+            <div style="font-weight: bold;">Wallet Connecting Coming Soon</div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchScreen('tap', this)"><div>Tap</div></div>
+        <div class="nav-item" onclick="switchScreen('friends', this)"><div>Friends</div></div>
+        <div class="nav-item" onclick="switchScreen('tasks', this)"><div>Tasks</div></div>
+        <div class="nav-item" onclick="switchScreen('leaderboard', this)"><div>Leader</div></div>
+        <div class="nav-item" onclick="switchScreen('airdrop', this)"><div>Airdrop</div></div>
     </div>
 
     <script>
@@ -199,68 +272,82 @@
         const energyCurrentDisplay = document.getElementById('energy-current');
         const energyBar = document.getElementById('energy-bar');
 
-        // User Name එක Telegram එකෙන් ගැනීම
         if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
             document.getElementById('user-title').innerText = `${tg.initDataUnsafe.user.first_name.toUpperCase()}'S COIN MASTER`;
         }
 
-        // Click Logic
+        // --- NAVIGATION LOGIC ---
+        window.switchScreen = function(screenId, navElement) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById('screen-' + screenId).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            navElement.classList.add('active');
+
+            if(screenId === 'leaderboard') {
+                document.getElementById('leader-my-score').innerText = score;
+            }
+
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // --- TAP LOGIC ---
         coinBtn.addEventListener('click', (e) => {
             if (energy > 0) {
                 score++;
                 scoreDisplay.innerText = score;
-
                 energy--;
                 updateEnergyUI();
-
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.impactOccurred('medium');
-                }
-
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
                 createFloatingScore(e.clientX, e.clientY);
             } else {
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('warning');
-                }
-                tg.showAlert("Energy ඉවරයි! ටිකක් වෙලාවකින් ආයෙ පිරෙයි.");
+                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
+                tg.showAlert("Energy ඉවරයි!");
             }
         });
 
-        // Floating Score Function
         function createFloatingScore(x, y) {
             const scoreText = document.createElement('div');
             scoreText.className = 'floating-score';
             scoreText.innerText = '+1';
-            
-            // Touch කරපු තැනට අනුව Text එක සෙට් කිරීම
             const rect = gameArea.getBoundingClientRect();
             const clickX = x ? x - rect.left : rect.width / 2;
             const clickY = y ? y - rect.top : rect.height / 2;
-
-            scoreText.style.left = `${clickX}px`;
-            scoreText.style.top = `${clickY}px`;
-
+            scoreText.style.left = clickX + 'px';
+            scoreText.style.top = clickY + 'px';
             gameArea.appendChild(scoreText);
-
-            setTimeout(() => {
-                scoreText.remove();
-            }, 800);
+            setTimeout(() => scoreText.remove(), 800);
         }
 
-        // Energy UI Update Function
         function updateEnergyUI() {
             energyCurrentDisplay.innerText = energy;
-            const energyPercentage = (energy / maxEnergy) * 100;
-            energyBar.style.width = `${energyPercentage}%`;
+            energyBar.style.width = (energy / maxEnergy) * 100 + '%';
         }
 
-        // Energy Refill Logic (තත්පරයකට වරක් පිරීම)
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy = Math.min(maxEnergy, energy + energyRecoveryRate);
                 updateEnergyUI();
             }
         }, 1000);
+
+        // --- TASKS LOGIC ---
+        window.doTask = function() {
+            tg.openTelegramLink('https://t.me/telegram'); 
+            setTimeout(() => {
+                score += 1000;
+                scoreDisplay.innerText = score;
+                document.getElementById('task-btn').innerText = "Claimed";
+                document.getElementById('task-btn').disabled = true;
+                tg.showAlert("ඔබට 1,000 Coins ලැබුණා!");
+            }, 2000);
+        }
+
+        // --- FRIENDS LOGIC ---
+        window.copyInvite = function() {
+            navigator.clipboard.writeText("Play and earn: t.me/your_bot_username");
+            tg.showAlert("Invite Link එක Copy කරගත්තා!");
+        }
     </script>
 </body>
 </html>
