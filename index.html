@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>TON Coin Master</title>
+    <title>Telegram Mini App - YouTube Tutorial Game</title>
+    <!-- Telegram Web App SDK එක සම්බන්ධ කිරීම -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -13,6 +14,7 @@
             --energy-color: #34d399;
             --accent-blue: #228be6;
             --card-bg: #21262d;
+            --yt-red: #ff0000;
         }
 
         body {
@@ -28,14 +30,15 @@
             overflow: hidden;
         }
 
+        /* Top Title Section */
         .top-bar {
             padding: 15px 16px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        .app-title { font-size: 13px; font-weight: bold; color: rgba(255, 255, 255, 0.5); letter-spacing: 1px; }
+        .app-title { font-size: 13px; font-weight: bold; color: #5dade2; letter-spacing: 1px; }
         .score-container {
-            font-size: 36px;
+            font-size: 40px;
             font-weight: 800;
             margin-top: 5px;
             display: flex;
@@ -44,7 +47,7 @@
             gap: 10px;
         }
 
-        /* Screens Logic */
+        /* Screen Management (පිටු පාලනය) */
         .screen {
             display: none; 
             flex-grow: 1;
@@ -57,7 +60,7 @@
             display: flex; 
         }
 
-        /* Tap Screen Area */
+        /* Game Core Area (Tap කරන්න හදපු තැන) */
         .game-area {
             width: 100%;
             display: flex;
@@ -75,9 +78,9 @@
         .coin {
             width: 180px;
             height: 180px;
-            background: radial-gradient(circle, #5dade2, #2471a3 80%);
+            background: radial-gradient(circle, #f5b041, #f39c12 80%);
             border-radius: 50%;
-            box-shadow: 0 10px 30px rgba(36, 113, 163, 0.4), inset 0 -5px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(243, 156, 18, 0.4), inset 0 -5px 15px rgba(0,0,0,0.3);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -86,9 +89,11 @@
             user-select: none;
         }
         .coin-wrapper:active .coin { transform: scale(0.95); }
+
+        /* Floating Animation (+1 ලකුණ උඩට යන එක) */
         .floating-score {
             position: absolute;
-            color: #5dade2;
+            color: #f5b041;
             font-size: 28px;
             font-weight: bold;
             opacity: 1;
@@ -99,6 +104,8 @@
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-120px); opacity: 0; }
         }
+
+        /* Energy Bar */
         .energy-section {
             width: 100%;
             padding-bottom: 10px;
@@ -124,7 +131,7 @@
             margin-bottom: 5px;
         }
 
-        /* Screens Styles */
+        /* Cards and Lists Styles */
         .screen h2 { margin-top: 0; color: #5dade2; }
         .screen p { text-align: center; color: rgba(255, 255, 255, 0.7); font-size: 14px; }
         
@@ -148,6 +155,7 @@
             font-weight: bold;
             cursor: pointer;
         }
+        .btn.btn-yt { background-color: var(--yt-red); }
         .btn:disabled { background-color: #486581; cursor: not-allowed; }
 
         .leader-list { width: 100%; }
@@ -158,7 +166,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        /* Bottom Nav */
+        /* Bottom Nav (යට තියෙන මෙනු බාර් එක) */
         .bottom-nav {
             background-color: var(--secondary-bg);
             padding: 12px 5px;
@@ -183,17 +191,20 @@
 </head>
 <body>
 
+    <!-- Top Score Area -->
     <div class="top-bar">
-        <div class="app-title" id="user-title">TON COIN MASTER</div>
+        <!-- මෙතන YOUR CHANNEL NAME වෙනුවට ඔයාගේ YouTube චැනල් එකේ නම දාන්න -->
+        <div class="app-title" id="user-title">YOUR CHANNEL NAME TECH</div>
         <div class="score-container">
-            💎 <span id="score">0</span>
+            🪙 <span id="score">0</span>
         </div>
     </div>
 
+    <!-- 1. TAP SCREEN -->
     <div id="screen-tap" class="screen active">
         <div class="game-area" id="game-area">
             <div class="coin-wrapper" id="coin-btn">
-                <div class="coin">💎</div>
+                <div class="coin">🪙</div>
             </div>
         </div>
         <div class="energy-section">
@@ -204,9 +215,10 @@
         </div>
     </div>
 
+    <!-- 2. FRIENDS SCREEN -->
     <div id="screen-friends" class="screen">
         <h2>Invite Friends</h2>
-        <p>ඔයාගේ යාලුවන්ට Invite කරලා Coins දිනාගන්න.</p>
+        <p>ඔයාගේ යාලුවන්ට Invite කරලා වැඩිපුර Coins දිනාගන්න.</p>
         <div class="card">
             <div>
                 <div style="font-weight: bold;">Invite Link</div>
@@ -216,21 +228,34 @@
         </div>
     </div>
 
+    <!-- 3. TASKS SCREEN (YouTube Task එක සහිතයි) -->
     <div id="screen-tasks" class="screen">
         <h2>Tasks</h2>
-        <p>සරල වැඩ කරලා වැඩිපුර Coins එකතු කරගන්න.</p>
+        <p>සරල වැඩ ටිකක් කරලා Coins දහස් ගණනින් ලබාගන්න.</p>
+        
+        <!-- YouTube Task -->
         <div class="card">
             <div>
-                <div style="font-weight: bold;">Join Our Channel</div>
+                <div style="font-weight: bold;">Subscribe Our YouTube</div>
+                <div style="color: #ff0000; font-size: 13px;">+5,000 Coins</div>
+            </div>
+            <button id="task-yt-btn" class="btn btn-yt" onclick="doYoutubeTask()">Subscribe</button>
+        </div>
+
+        <!-- Telegram Task -->
+        <div class="card">
+            <div>
+                <div style="font-weight: bold;">Join Telegram Channel</div>
                 <div style="color: #34d399; font-size: 13px;">+1,000 Coins</div>
             </div>
             <button id="task-btn" class="btn" onclick="doTask()">Join</button>
         </div>
     </div>
 
+    <!-- 4. LEADERBOARD SCREEN -->
     <div id="screen-leaderboard" class="screen">
         <h2>Leaderboard</h2>
-        <p>වැඩිම Coins තියෙන සුපිරිම වැඩ්ඩෝ ටික.</p>
+        <p>දැනට වැඩිම Coins තියෙන සුපිරිම වැඩ්ඩෝ ටික.</p>
         <div class="leader-list">
             <div class="leader-item" style="color: gold;"><span>🥇 1. Kasun</span><span>542,300</span></div>
             <div class="leader-item" style="color: silver;"><span>🥈 2. Nuwan</span><span>410,250</span></div>
@@ -239,15 +264,17 @@
         </div>
     </div>
 
+    <!-- 5. AIRDROP SCREEN -->
     <div id="screen-airdrop" class="screen">
         <h2>Airdrop</h2>
         <p>Listing & Distribution ළඟදීම බලාපොරොත්තු වන්න!</p>
         <div class="card" style="justify-content: center; flex-direction: column; gap: 10px;">
             <div style="font-size: 50px;">🎁</div>
-            <div style="font-weight: bold;">Wallet Connecting Coming Soon</div>
+            <div style="font-weight: bold;">Wallet Connect (Coming Soon)</div>
         </div>
     </div>
 
+    <!-- Bottom Navigation Bar (යට බාර් එක) -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchScreen('tap', this)"><div>Tap</div></div>
         <div class="nav-item" onclick="switchScreen('friends', this)"><div>Friends</div></div>
@@ -258,7 +285,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand();
+        tg.expand(); // Game එක full screen ඕපන් කිරීමට
         tg.enableClosingConfirmation(); 
 
         let score = 0;
@@ -272,11 +299,7 @@
         const energyCurrentDisplay = document.getElementById('energy-current');
         const energyBar = document.getElementById('energy-bar');
 
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            document.getElementById('user-title').innerText = `${tg.initDataUnsafe.user.first_name.toUpperCase()}'S COIN MASTER`;
-        }
-
-        // --- NAVIGATION LOGIC ---
+        // --- SCREEN CHANGING FUNCTION (පිටු මාරු කිරීමේ ක්‍රියාවලිය) ---
         window.switchScreen = function(screenId, navElement) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById('screen-' + screenId).classList.add('active');
@@ -291,18 +314,18 @@
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        // --- TAP LOGIC ---
+        // --- COIN CLICK LOGIC ---
         coinBtn.addEventListener('click', (e) => {
             if (energy > 0) {
                 score++;
                 scoreDisplay.innerText = score;
                 energy--;
                 updateEnergyUI();
-                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+                if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium'); // Vibration එක දීම
                 createFloatingScore(e.clientX, e.clientY);
             } else {
                 if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('warning');
-                tg.showAlert("Energy ඉවරයි!");
+                tg.showAlert("Energy ඉවරයි! ටික වෙලාවකින් පිරෙයි.");
             }
         });
 
@@ -324,6 +347,7 @@
             energyBar.style.width = (energy / maxEnergy) * 100 + '%';
         }
 
+        // Energy Recovery (ඉබේ පිරීම)
         setInterval(() => {
             if (energy < maxEnergy) {
                 energy = Math.min(maxEnergy, energy + energyRecoveryRate);
@@ -331,21 +355,35 @@
             }
         }, 1000);
 
-        // --- TASKS LOGIC ---
+        // --- YOUTUBE TASK LOGIC ---
+        window.doYoutubeTask = function() {
+            // මෙතනට ඔයාගේ YouTube චැනල් එකේ ලින්ක් එක දාන්න
+            tg.openLink('https://www.youtube.com/'); 
+            
+            setTimeout(() => {
+                score += 5000; // 5000 Coins තෑගි දීම
+                scoreDisplay.innerText = score;
+                document.getElementById('task-yt-btn').innerText = "Claimed ✓";
+                document.getElementById('task-yt-btn').disabled = true;
+                tg.showAlert("චැනල් එක සබ්ස්ක්‍රයිබ් කරාට ස්තුතියි! ඔබට 5,000 Coins ලැබුණා.");
+            }, 3000);
+        }
+
+        // --- TELEGRAM TASK LOGIC ---
         window.doTask = function() {
             tg.openTelegramLink('https://t.me/telegram'); 
             setTimeout(() => {
                 score += 1000;
                 scoreDisplay.innerText = score;
-                document.getElementById('task-btn').innerText = "Claimed";
+                document.getElementById('task-btn').innerText = "Claimed ✓";
                 document.getElementById('task-btn').disabled = true;
                 tg.showAlert("ඔබට 1,000 Coins ලැබුණා!");
             }, 2000);
         }
 
-        // --- FRIENDS LOGIC ---
+        // --- FRIENDS COPY LINK ---
         window.copyInvite = function() {
-            navigator.clipboard.writeText("Play and earn: t.me/your_bot_username");
+            navigator.clipboard.writeText("Play my game and earn coins: t.me/your_bot_username");
             tg.showAlert("Invite Link එක Copy කරගත්තා!");
         }
     </script>
